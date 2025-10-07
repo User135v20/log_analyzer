@@ -1,10 +1,16 @@
 import argparse
 import configparser
+import os
 
-from src.log_analyzer.get_statistic import *
-from src.log_analyzer.read_file import *
-from src.log_analyzer.settings import *
-
+import re
+from src.log_analyzer.get_statistic import write_html_with_template, LogAnalyzerClass
+from src.log_analyzer.read_file import get_filename, read_logs
+from src.log_analyzer.settings import (
+    DEF_REPORT_DIR,
+    DEF_LOG_DIR,
+    DEF_REPORT_SIZE,
+    DEF_CONFIG_PATH,
+)
 
 
 def parse_line(line):
@@ -23,7 +29,7 @@ def parse_line(line):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, required=False)
+    parser.add_argument("--config", type=str, required=False)
     args = parser.parse_args()
 
     config_path = args.config
@@ -34,7 +40,6 @@ def main():
         print(f"Файл конфигурации не найден: {config_path}")
         return
 
-
     config = configparser.ConfigParser()
     config.read(config_path)
 
@@ -42,28 +47,26 @@ def main():
     log_dir = config["DEFAULT"]["LOG_DIR"] or DEF_LOG_DIR
     report_size = int(config["DEFAULT"]["REPORT_SIZE"] or DEF_REPORT_SIZE)
 
-
-
     analyzer = LogAnalyzerClass()
 
     filename = get_filename(log_dir)
     for line_number, line in enumerate(read_logs(f"{log_dir}{os.sep}{filename}"), 1):
-
-        if line_number == 10000:
-            break
-
+        # if line_number == 10000:
+        #     break
 
         try:
             line = parse_line(line)
             analyzer.add_line(line)
-        except:
+        except Exception:
             pass
-
 
     statistics = analyzer.get_statistic()
 
-    report_name = "report-"+re.search(r'\d{8}', filename).group(0)+".html"
-    write_html_with_template(statistics, report_size, fr"{report_dir}{os.sep}{report_name}")
+    report_name = "report-" + re.search(r"\d{8}", filename).group(0) + ".html"
+    write_html_with_template(
+        statistics, report_size, rf"{report_dir}{os.sep}{report_name}"
+    )
+
 
 if __name__ == "__main__":
     main()
