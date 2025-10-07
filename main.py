@@ -53,7 +53,6 @@ def main():
     for line_number, line in enumerate(read_logs(f"{log_dir}{os.sep}{filename}"), 1):
         # if line_number == 10000:
         #     break
-
         try:
             line = parse_line(line)
             analyzer.add_line(line)
