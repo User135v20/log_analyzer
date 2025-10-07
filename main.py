@@ -1,5 +1,11 @@
-from log_analyzer.get_statistic import *
-from log_analyzer.read_file import _read
+import argparse
+import configparser
+
+from src.log_analyzer.get_statistic import *
+from src.log_analyzer.read_file import *
+from src.log_analyzer.settings import *
+
+
 
 def parse_line(line):
     log_pattern = re.compile(
@@ -16,13 +22,37 @@ def parse_line(line):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, required=False)
+    args = parser.parse_args()
+
+    config_path = args.config
+    if config_path is None:
+        config_path = DEF_CONFIG_PATH
+
+    if not os.path.isfile(config_path):
+        print(f"Файл конфигурации не найден: {config_path}")
+        return
+
+
+    config = configparser.ConfigParser()
+    config.read(config_path)
+
+    report_dir = config["DEFAULT"]["REPORT_DIR"] or DEF_REPORT_DIR
+    log_dir = config["DEFAULT"]["LOG_DIR"] or DEF_LOG_DIR
+    report_size = int(config["DEFAULT"]["REPORT_SIZE"] or DEF_REPORT_SIZE)
+
+
+
     analyzer = LogAnalyzerClass()
 
-    #добавление данных
-    for line_number, line in enumerate(_read(), 1):
+    filename = get_filename(log_dir)
+    for line_number, line in enumerate(read_logs(f"{log_dir}{os.sep}{filename}"), 1):
 
-        # if line_number == 10000:
-        #     break
+        if line_number == 10000:
+            break
+
+
         try:
             line = parse_line(line)
             analyzer.add_line(line)
@@ -30,9 +60,10 @@ def main():
             pass
 
 
+    statistics = analyzer.get_statistic()
 
-    # Генерируем JSON данные
-    write_html_with_template(analyzer.get_statistic())
+    report_name = "report-"+re.search(r'\d{8}', filename).group(0)+".html"
+    write_html_with_template(statistics, report_size, fr"{report_dir}{os.sep}{report_name}")
 
 if __name__ == "__main__":
     main()

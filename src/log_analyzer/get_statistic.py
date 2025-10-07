@@ -1,9 +1,7 @@
-import re
 import statistics
 import json
-import os
-from datetime import datetime
-from msilib.schema import tables
+
+from src.log_analyzer.settings import TEMPLATE_PATH
 
 
 class LogAnalyzerClass():
@@ -24,7 +22,6 @@ class LogAnalyzerClass():
                 "count": 0,
                 "times": [],
                 "url": url,
-
             }
 
         self.log_info[url]["count"] += 1
@@ -54,20 +51,15 @@ class LogAnalyzerClass():
     def get_statistic(self):
         self._calculate_statistics()
         return self.log_info
-        # for line in self.log_info:
-        #     yield line
 
 
 
 
+def write_html_with_template(json_data, max_rows, output_file):
 
-
-def write_html_with_template(json_data, template_path="data/report.html", output_file="report.html"):
-
-    with open(template_path, "r", encoding="utf-8") as template_file:
+    with open(TEMPLATE_PATH, "r", encoding="utf-8") as template_file:
         template_content = template_file.read()
-    
-    max_rows = 2
+
     json_str = json.dumps(json_data[:max_rows], ensure_ascii=False, indent=2)
     html_content = template_content.replace("$table_json", json_str)
     
