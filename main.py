@@ -36,16 +36,20 @@ def main():
     if config_path is None:
         config_path = DEF_CONFIG_PATH
 
+    report_dir = DEF_REPORT_DIR
+    log_dir = DEF_LOG_DIR
+    report_size = DEF_REPORT_SIZE
+
     if not os.path.isfile(config_path):
         print(f"Файл конфигурации не найден: {config_path}")
-        return
 
-    config = configparser.ConfigParser()
-    config.read(config_path)
+    else:
+        config = configparser.ConfigParser()
+        config.read(config_path)
 
-    report_dir = config["DEFAULT"]["REPORT_DIR"] or DEF_REPORT_DIR
-    log_dir = config["DEFAULT"]["LOG_DIR"] or DEF_LOG_DIR
-    report_size = int(config["DEFAULT"]["REPORT_SIZE"] or DEF_REPORT_SIZE)
+        report_dir = config["DEFAULT"]["REPORT_DIR"] or DEF_REPORT_DIR
+        log_dir = config["DEFAULT"]["LOG_DIR"] or DEF_LOG_DIR
+        report_size = int(config["DEFAULT"]["REPORT_SIZE"] or DEF_REPORT_SIZE)
 
     analyzer = LogAnalyzerClass()
 
