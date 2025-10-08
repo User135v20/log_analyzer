@@ -1,30 +1,10 @@
 import argparse
-import configparser
 import os
 import re
 
-from src.log_analyzer.get_statistic import LogAnalyzerClass, write_html_with_template
-from src.log_analyzer.read_file import get_filename, read_logs
-from src.log_analyzer.settings import (
-    DEF_CONFIG_PATH,
-    DEF_LOG_DIR,
-    DEF_REPORT_DIR,
-    DEF_REPORT_SIZE,
-)
-
-
-def parse_line(line):
-    log_pattern = re.compile(
-        r'(?P<ip>\d+\.\d+\.\d+\.\d+)\s+(?P<user_id>\S+)\s+-\s+\[(?P<date_time>[^\]]+)\]\s+"(?P<method>\w+)\s+(?P<url>\S+)\s+HTTP/(?P<http_version>[\d.]+)"\s+'
-        r'(?P<status>\d+)\s+(?P<size>\d+)\s+"(?P<referrer>.*?)"\s+"(?P<user_agent>.*?)"\s+"(?P<some_field>.*?)"\s+"(?P<another_field>.*?)"\s+(?P<request_time>[\d.]+)'
-    )
-    match = log_pattern.match(line)
-
-    if match:
-        data = match.groupdict()
-    else:
-        raise Exception("problem with parse")
-    return data
+from src.log_analyzer.analyzer import LogAnalyzerClass, write_html_with_template
+from src.log_analyzer.file_manager import get_filename, parse_line, read_json_file, read_logs
+from src.log_analyzer.settings import CONFIG, DEF_CONFIG_PATH
 
 
 def main():
@@ -36,25 +16,18 @@ def main():
     if config_path is None:
         config_path = DEF_CONFIG_PATH
 
-    report_dir = DEF_REPORT_DIR
-    log_dir = DEF_LOG_DIR
-    report_size = DEF_REPORT_SIZE
-
+    config = CONFIG
     if not os.path.isfile(config_path):
         print(f"Файл конфигурации не найден: {config_path}")
-
     else:
-        config = configparser.ConfigParser()
-        config.read(config_path)
-
-        report_dir = config["DEFAULT"]["REPORT_DIR"] or DEF_REPORT_DIR
-        log_dir = config["DEFAULT"]["LOG_DIR"] or DEF_LOG_DIR
-        report_size = int(config["DEFAULT"]["REPORT_SIZE"] or DEF_REPORT_SIZE)
+        config_from_file = read_json_file(config_path)
+        config.update(config_from_file)
 
     analyzer = LogAnalyzerClass()
 
-    filename = get_filename(log_dir)
-    for line_number, line in enumerate(read_logs(f"{log_dir}{os.sep}{filename}"), 1):
+    filename = get_filename(config["LOG_DIR"])
+    for line in read_logs(f"{config['LOG_DIR']}{os.sep}{filename}"):
+        # test_case
         # if line_number == 10000:
         #     break
         try:
@@ -66,7 +39,7 @@ def main():
     statistics = analyzer.get_statistic()
 
     report_name = "report-" + re.search(r"\d{8}", filename).group(0) + ".html"
-    write_html_with_template(statistics, report_size, rf"{report_dir}{os.sep}{report_name}")
+    write_html_with_template(statistics, config["REPORT_SIZE"], rf"{config['REPORT_DIR']}{os.sep}{report_name}")
 
 
 if __name__ == "__main__":

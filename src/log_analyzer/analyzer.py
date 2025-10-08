@@ -1,6 +1,7 @@
 import json
 import statistics
 
+from src.log_analyzer.file_manager import read_file, write_file
 from src.log_analyzer.settings import TEMPLATE_PATH
 
 
@@ -51,14 +52,9 @@ class LogAnalyzerClass:
 
 
 def write_html_with_template(json_data, max_rows, output_file):
-    with open(TEMPLATE_PATH, encoding="utf-8") as template_file:
-        template_content = template_file.read()
-
+    template_content = read_file(TEMPLATE_PATH)
     json_str = json.dumps(json_data[:max_rows], ensure_ascii=False, indent=2)
     html_content = template_content.replace("$table_json", json_str)
-
-    with open(output_file, "w", encoding="utf-8") as output:
-        output.write(html_content)
-
+    write_file(output_file, html_content)
     print(f"HTML отчет сохранен в: {output_file}")
     return output_file
