@@ -1,15 +1,15 @@
 import argparse
 import configparser
 import os
-
 import re
-from src.log_analyzer.get_statistic import write_html_with_template, LogAnalyzerClass
+
+from src.log_analyzer.get_statistic import LogAnalyzerClass, write_html_with_template
 from src.log_analyzer.read_file import get_filename, read_logs
 from src.log_analyzer.settings import (
-    DEF_REPORT_DIR,
-    DEF_LOG_DIR,
-    DEF_REPORT_SIZE,
     DEF_CONFIG_PATH,
+    DEF_LOG_DIR,
+    DEF_REPORT_DIR,
+    DEF_REPORT_SIZE,
 )
 
 
@@ -66,9 +66,7 @@ def main():
     statistics = analyzer.get_statistic()
 
     report_name = "report-" + re.search(r"\d{8}", filename).group(0) + ".html"
-    write_html_with_template(
-        statistics, report_size, rf"{report_dir}{os.sep}{report_name}"
-    )
+    write_html_with_template(statistics, report_size, rf"{report_dir}{os.sep}{report_name}")
 
 
 if __name__ == "__main__":

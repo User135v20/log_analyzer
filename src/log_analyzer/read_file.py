@@ -4,9 +4,6 @@ from datetime import datetime
 from pathlib import Path
 
 
-# TODO class input dir_name
-
-
 def extract_date(filename):
     match = re.search(r"(\d{8})(\.\w+)?$", filename)
     if match:

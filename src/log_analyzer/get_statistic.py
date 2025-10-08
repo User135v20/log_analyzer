@@ -1,5 +1,5 @@
-import statistics
 import json
+import statistics
 
 from src.log_analyzer.settings import TEMPLATE_PATH
 
@@ -43,9 +43,7 @@ class LogAnalyzerClass:
             }
             self.log_info[url] = new_value
 
-        self.log_info = sorted(
-            self.log_info.values(), key=lambda x: x["time_sum"], reverse=True
-        )
+        self.log_info = sorted(self.log_info.values(), key=lambda x: x["time_sum"], reverse=True)
 
     def get_statistic(self):
         self._calculate_statistics()
@@ -53,7 +51,7 @@ class LogAnalyzerClass:
 
 
 def write_html_with_template(json_data, max_rows, output_file):
-    with open(TEMPLATE_PATH, "r", encoding="utf-8") as template_file:
+    with open(TEMPLATE_PATH, encoding="utf-8") as template_file:
         template_content = template_file.read()
 
     json_str = json.dumps(json_data[:max_rows], ensure_ascii=False, indent=2)
