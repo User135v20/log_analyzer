@@ -50,6 +50,7 @@ class LogAnalyzerClass:
         return self.log_info
 
 
+
 def write_html_with_template(json_data, max_rows, output_file):
     with open(TEMPLATE_PATH, encoding="utf-8") as template_file:
         template_content = template_file.read()
