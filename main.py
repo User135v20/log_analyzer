@@ -27,6 +27,8 @@ def main():
     analyzer = LogAnalyzerClass()
 
     filename = get_filename(config["LOG_DIR"])
+    if not filename:
+        return
     for line in read_logs(f"{config['LOG_DIR']}{os.sep}{filename}"):
         # test_case
         # if line_number == 10000:
