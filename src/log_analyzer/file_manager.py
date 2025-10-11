@@ -34,6 +34,7 @@ def extract_date(filename):
 def get_filename(dir_name):
     directory_path = Path(dir_name)
     max_date = datetime.min
+    file = None
     for el in directory_path.iterdir():
         if not (el.is_file() and el.name.startswith("nginx-access-ui")):
             continue
@@ -44,7 +45,7 @@ def get_filename(dir_name):
             max_date = date_for_file
 
     if file is None:
-        raise FileNotFoundError(f"No file found at {dir_name}")
+        print(f"No file found at {dir_name}")
 
     return file
 
