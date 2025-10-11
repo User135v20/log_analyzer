@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+from datetime import datetime
 
 from src.log_analyzer.analyzer import LogAnalyzerClass, write_html_with_template
 from src.log_analyzer.file_manager import get_filename, parse_line, read_json_file, read_logs
@@ -38,7 +39,8 @@ def main():
 
     statistics = analyzer.get_statistic()
 
-    report_name = "report-" + re.search(r"\d{8}", filename).group(0) + ".html"
+    date_for_report = datetime.strptime(re.search(r"\d{8}", filename).group(0), "%Y%m%d").strftime("%Y.%m.%d")
+    report_name = f"report-{date_for_report}.html"
     write_html_with_template(statistics, config["REPORT_SIZE"], rf"{config['REPORT_DIR']}{os.sep}{report_name}")
 
 
