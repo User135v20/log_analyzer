@@ -10,8 +10,10 @@ dependencies = [
     "pip>=25.2",
     "pre-commit>=4.3.0",
     "pyparsing>=3.2.5",
+    "pytest>=8.4.2",
     "requests>=2.32.5",
     "ruff>=0.14.0",
+    "structlog>=25.4.0",
 ]
 
 [tool.ruff]
@@ -57,3 +59,9 @@ quote-style = "double"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "SIM", "UP"]
 ignore = ["B008", "UP007", "B905"]
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

@@ -6,6 +6,12 @@ from inspect import signature
 from pathlib import Path
 
 
+def _get_logger():
+    from src.log_analyzer.settings import logger
+
+    return logger
+
+
 def parse_line(line):
     log_pattern = re.compile(
         r'(?P<ip>\d+\.\d+\.\d+\.\d+)\s+(?P<user_id>\S+)\s+-\s+\[(?P<date_time>[^\]]+)\]\s+"(?P<method>\w+)\s+(?P<url>\S+)\s+HTTP/(?P<http_version>[\d.]+)"\s+'
@@ -15,9 +21,17 @@ def parse_line(line):
 
     if match:
         data = match.groupdict()
+        return data
     else:
-        raise Exception("problem with parse")
-    return data
+        logger = _get_logger()
+        if logger is not None:
+            logger.warning(f"problem with parse line: {line}")
+        return None
+
+
+def is_nginx_log_file(filename):
+    pattern = r"^nginx-access-ui\.log-\d{8}(\.gz)?$"
+    return re.match(pattern, filename) is not None
 
 
 def extract_date(filename):
@@ -36,28 +50,34 @@ def get_filename(dir_name):
     max_date = datetime.min
     file = None
     for el in directory_path.iterdir():
-        if not (el.is_file() and el.name.startswith("nginx-access-ui")):
+        if not (el.is_file() and is_nginx_log_file(el.name)):
             continue
-
         date_for_file = extract_date(el.name)
         if date_for_file > max_date:
             file = el.name
             max_date = date_for_file
-
     if file is None:
-        print(f"No file found at {dir_name}")
-
+        logger = _get_logger()
+        if logger is not None:
+            logger.warning(f"No file found at {dir_name}")
     return file
 
 
-def check_file(arg_name):
+def check_file(path):
+    return Path(path).exists()
+
+
+def _check_file(arg_name):
     def decorator(func):
         def wrapper(*args, **kwargs):
             sig = signature(func)
             params = sig.bind(*args, **kwargs)
             params.apply_defaults()
-            file_path = Path(params.arguments[arg_name])
-            if not file_path.exists():
+            file_path = params.arguments[arg_name]
+            if not check_file(file_path):
+                logger = _get_logger()
+                if logger is not None:
+                    logger.error(f"No file found at {file_path}")
                 raise FileNotFoundError(f"No file found at {file_path}")
             return func(*args, **kwargs)
 
@@ -66,21 +86,19 @@ def check_file(arg_name):
     return decorator
 
 
-@check_file("file_path")
 def read_gz_line_by_line(file_path):
     with gzip.open(file_path, "rt", encoding="utf-8") as f:
         for line in f:
             yield line.strip()
 
 
-@check_file("file_path")
 def read_file_line_by_line(file_path):
     with open(file_path, encoding="utf-8") as file:
         for line in file:
             yield line.strip()
 
 
-@check_file("file_path")
+@_check_file("file_path")
 def read_file(file_path):
     with open(file_path, encoding="utf-8") as file:
         return file.read()
