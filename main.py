@@ -18,11 +18,11 @@ def main():
         config_path = DEF_CONFIG_PATH
 
     config = CONFIG
-    if not os.path.isfile(config_path):
-        print(f"Файл конфигурации не найден: {config_path}")
-    else:
+    try:
         config_from_file = read_json_file(config_path)
         config.update(config_from_file)
+    except Exception as e:
+        raise Exception(f"Failed to read config file. path: {config_path}") from e
 
     analyzer = LogAnalyzerClass()
 
