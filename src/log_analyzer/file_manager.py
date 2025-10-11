@@ -50,14 +50,18 @@ def get_filename(dir_name):
     return file
 
 
-def check_file(arg_name):
+def check_file(path):
+    return Path(path).exists()
+
+
+def _check_file(arg_name):
     def decorator(func):
         def wrapper(*args, **kwargs):
             sig = signature(func)
             params = sig.bind(*args, **kwargs)
             params.apply_defaults()
-            file_path = Path(params.arguments[arg_name])
-            if not file_path.exists():
+            file_path = params.arguments[arg_name]
+            if not check_file(file_path):
                 raise FileNotFoundError(f"No file found at {file_path}")
             return func(*args, **kwargs)
 
@@ -66,21 +70,19 @@ def check_file(arg_name):
     return decorator
 
 
-@check_file("file_path")
 def read_gz_line_by_line(file_path):
     with gzip.open(file_path, "rt", encoding="utf-8") as f:
         for line in f:
             yield line.strip()
 
 
-@check_file("file_path")
 def read_file_line_by_line(file_path):
     with open(file_path, encoding="utf-8") as file:
         for line in file:
             yield line.strip()
 
 
-@check_file("file_path")
+@_check_file("file_path")
 def read_file(file_path):
     with open(file_path, encoding="utf-8") as file:
         return file.read()
