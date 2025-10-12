@@ -1,4 +1,19 @@
+import logging
 import os
+
+import structlog
+
+logging.basicConfig(level=logging.INFO, format="%(message)s", filename="my_logs.log", filemode="a")
+
+structlog.configure(
+    processors=[structlog.processors.TimeStamper(fmt="iso"), structlog.processors.JSONRenderer()],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
+logger = structlog.get_logger()
+
 
 DEF_CONFIG_PATH = "config.json"
 DEF_REPORT_DIR = "data"

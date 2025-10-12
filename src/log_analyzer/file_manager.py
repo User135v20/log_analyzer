@@ -5,6 +5,8 @@ from datetime import datetime
 from inspect import signature
 from pathlib import Path
 
+from src.log_analyzer.settings import logger
+
 
 def parse_line(line):
     log_pattern = re.compile(
@@ -15,9 +17,10 @@ def parse_line(line):
 
     if match:
         data = match.groupdict()
+        return data
     else:
-        raise Exception("problem with parse")
-    return data
+        logger.warning(f"problem with parse line: {line}")
+        return None
 
 
 def extract_date(filename):
@@ -38,15 +41,12 @@ def get_filename(dir_name):
     for el in directory_path.iterdir():
         if not (el.is_file() and el.name.startswith("nginx-access-ui")):
             continue
-
         date_for_file = extract_date(el.name)
         if date_for_file > max_date:
             file = el.name
             max_date = date_for_file
-
     if file is None:
-        print(f"No file found at {dir_name}")
-
+        logger.warning(f"No file found at {dir_name}")
     return file
 
 
@@ -62,6 +62,7 @@ def _check_file(arg_name):
             params.apply_defaults()
             file_path = params.arguments[arg_name]
             if not check_file(file_path):
+                logger.error(f"No file found at {file_path}")
                 raise FileNotFoundError(f"No file found at {file_path}")
             return func(*args, **kwargs)
 

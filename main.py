@@ -5,10 +5,11 @@ from datetime import datetime
 
 from src.log_analyzer.analyzer import LogAnalyzerClass, write_html_with_template
 from src.log_analyzer.file_manager import check_file, get_filename, parse_line, read_json_file, read_logs
-from src.log_analyzer.settings import CONFIG, DEF_CONFIG_PATH
+from src.log_analyzer.settings import CONFIG, DEF_CONFIG_PATH, logger
 
 
 def main():
+    logger.info("log analysis started.")
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=False)
     args = parser.parse_args()
@@ -22,6 +23,7 @@ def main():
         config_from_file = read_json_file(config_path)
         config.update(config_from_file)
     except Exception as e:
+        logger.error(f"Failed to read config file. path: {config_path}")
         raise Exception(f"Failed to read config file. path: {config_path}") from e
 
     analyzer = LogAnalyzerClass()
@@ -32,17 +34,21 @@ def main():
     date_for_report = datetime.strptime(re.search(r"\d{8}", filename).group(0), "%Y%m%d").strftime("%Y.%m.%d")
     report_name = f"report-{date_for_report}.html"
     if check_file(rf"{config['REPORT_DIR']}{os.sep}{report_name}"):
-        print(f"Report {report_name} already exists.")
+        logger.info(f"Report {report_name} already exists.")
         return
+
+    count = 0
+    problem_lines = 0
     for line in read_logs(f"{config['LOG_DIR']}{os.sep}{filename}"):
-        # test_case
-        # if line_number == 10000:
-        #     break
-        try:
-            line = parse_line(line)
+        count += 1
+        line = parse_line(line)
+        if line:
             analyzer.add_line(line)
-        except Exception:
-            pass
+        else:
+            problem_lines += 1
+
+    if problem_lines / count > 0.5:
+        logger.error(f"most of the analyzed the log ({round(problem_lines / count, 2)}) could not be parsed.")
 
     statistics = analyzer.get_statistic()
     write_html_with_template(statistics, config["REPORT_SIZE"], rf"{config['REPORT_DIR']}{os.sep}{report_name}")
