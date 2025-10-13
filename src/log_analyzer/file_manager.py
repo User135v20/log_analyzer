@@ -5,11 +5,7 @@ from datetime import datetime
 from inspect import signature
 from pathlib import Path
 
-
-def _get_logger():
-    from src.log_analyzer.settings import logger
-
-    return logger
+from src.log_analyzer.settings import _get_logger
 
 
 def parse_line(line):

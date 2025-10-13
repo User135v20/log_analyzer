@@ -22,6 +22,10 @@ CONFIG = {
 logger = None
 
 
+def _get_logger():
+    return logger
+
+
 def configure_logger(logfile: str = ANALYZER_LOGS):
     global logger
     logging.basicConfig(level=logging.INFO, format="%(message)s", filename=logfile, filemode="a")
