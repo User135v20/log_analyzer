@@ -5,11 +5,10 @@ from datetime import datetime
 
 from src.log_analyzer.analyzer import LogAnalyzerClass, write_html_with_template
 from src.log_analyzer.file_manager import check_file, get_filename, parse_line, read_json_file, read_logs
-from src.log_analyzer.settings import CONFIG, DEF_CONFIG_PATH, logger
+from src.log_analyzer.settings import CONFIG, DEF_CONFIG_PATH, configure_logger
 
 
 def main():
-    logger.info("log analysis started.")
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=False)
     args = parser.parse_args()
@@ -23,9 +22,10 @@ def main():
         config_from_file = read_json_file(config_path)
         config.update(config_from_file)
     except Exception as e:
-        logger.error(f"Failed to read config file. path: {config_path}")
         raise Exception(f"Failed to read config file. path: {config_path}") from e
 
+    logger = configure_logger(config["ANALYZER_LOGS"])
+    logger.info("log analysis started.")
     analyzer = LogAnalyzerClass()
 
     filename = get_filename(config["LOG_DIR"])

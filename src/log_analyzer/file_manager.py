@@ -5,7 +5,11 @@ from datetime import datetime
 from inspect import signature
 from pathlib import Path
 
-from src.log_analyzer.settings import logger
+
+def _get_logger():
+    from src.log_analyzer.settings import logger
+
+    return logger
 
 
 def parse_line(line):
@@ -19,8 +23,15 @@ def parse_line(line):
         data = match.groupdict()
         return data
     else:
-        logger.warning(f"problem with parse line: {line}")
+        logger = _get_logger()
+        if logger is not None:
+            logger.warning(f"problem with parse line: {line}")
         return None
+
+
+def is_nginx_log_file(filename):
+    pattern = r"^nginx-access-ui\.log-\d{8}(\.gz)?$"
+    return re.match(pattern, filename) is not None
 
 
 def extract_date(filename):
@@ -39,14 +50,16 @@ def get_filename(dir_name):
     max_date = datetime.min
     file = None
     for el in directory_path.iterdir():
-        if not (el.is_file() and el.name.startswith("nginx-access-ui")):
+        if not (el.is_file() and is_nginx_log_file(el.name)):
             continue
         date_for_file = extract_date(el.name)
         if date_for_file > max_date:
             file = el.name
             max_date = date_for_file
     if file is None:
-        logger.warning(f"No file found at {dir_name}")
+        logger = _get_logger()
+        if logger is not None:
+            logger.warning(f"No file found at {dir_name}")
     return file
 
 
@@ -62,7 +75,9 @@ def _check_file(arg_name):
             params.apply_defaults()
             file_path = params.arguments[arg_name]
             if not check_file(file_path):
-                logger.error(f"No file found at {file_path}")
+                logger = _get_logger()
+                if logger is not None:
+                    logger.error(f"No file found at {file_path}")
                 raise FileNotFoundError(f"No file found at {file_path}")
             return func(*args, **kwargs)
 
