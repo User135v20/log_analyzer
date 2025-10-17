@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Ruff
         uses: docker://ghcr.io/astral-sh/ruff:0.9.1-alpine
@@ -52,7 +52,7 @@ jobs:
           docker run --rm -v $GITHUB_WORKSPACE:/app ghcr.io/astral-sh/ruff:0.9.1-alpine ruff check --output-format=gitlab > code-quality-report.json
 
       - name: Upload code quality report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-quality-report
           path: code-quality-report.json
@@ -64,7 +64,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Run Ruff format
         run: |
