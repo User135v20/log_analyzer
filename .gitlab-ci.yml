@@ -7,8 +7,7 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch: # Для запуска вручную
-
+  workflow_dispatch:
 jobs:
   testing:
     name: Testing
@@ -64,8 +63,6 @@ jobs:
 
       - name: Set up Ruff
         uses: docker://ghcr.io/astral-sh/ruff:0.9.1-alpine
-        # Для выполнения команд внутри контейнера — потребуется более сложная настройка,
-        # например, запуск через `docker run`. Ниже пример, как это можно реализовать.
 
       - name: Run Ruff check
         run: |
