@@ -44,12 +44,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Ruff
-        uses: docker://ghcr.io/astral-sh/ruff:0.9.1-alpine
-
       - name: Run Ruff check
         run: |
-          docker run --rm -v $GITHUB_WORKSPACE:/app ghcr.io/astral-sh/ruff:0.9.1-alpine ruff check
+          docker run --rm -v $PWD:/app -w /app ghcr.io/astral-sh/ruff:0.9.1-alpine ruff check .
 
   ruff_format:
     name: Ruff Format
@@ -62,4 +59,4 @@ jobs:
 
       - name: Run Ruff format
         run: |
-          docker run --rm -v $GITHUB_WORKSPACE:/app ghcr.io/astral-sh/ruff:0.9.1-alpine ruff format --diff
+          docker run --rm -v $PWD:/app -w /app ghcr.io/astral-sh/ruff:0.9.1-alpine ruff format --check .
