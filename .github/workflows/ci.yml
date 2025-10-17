@@ -29,28 +29,11 @@ jobs:
           virtualenv venv
           source venv/bin/activate
           pip install .[test]
-          pip install pytest-cov
 
       - name: Run unit tests with coverage
         run: |
           source venv/bin/activate
           coverage run -m pytest log_analyzer/src/tests/
-          coverage report -m
-          coverage xml
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage.xml
-
-      - name: Upload coverage report as review
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: code-quality-report
-          path: ${{ github.workspace }}/code-quality-report.json
 
   ruff_check:
     name: Ruff Check
