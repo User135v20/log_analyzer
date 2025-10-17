@@ -33,7 +33,7 @@ jobs:
       - name: Run unit tests with coverage
         run: |
           source venv/bin/activate
-          pytest log_analyzer/src/tests/
+          pytest src/tests/
 
   ruff_check:
     name: Ruff Check
